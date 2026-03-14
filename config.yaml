@@ -1,0 +1,62 @@
+# ============================================================
+#  Bearing Fault Detection — Centralized Configuration
+# ============================================================
+
+data:
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  sampling_rate: 12000          # Hz
+  window_size: 2048             # samples per window
+  overlap: 0.5                  # 50% overlap
+  train_ratio: 0.8
+
+# Bearing geometry (CWRU test rig - 6205-2RS JEM SKF)
+bearing:
+  n_balls: 9
+  ball_diameter: 0.3126         # inches
+  pitch_diameter: 1.537         # inches
+  contact_angle: 0              # degrees
+  shaft_rpm: 1797               # RPM at 0HP load
+
+classes:
+  0: "Normal"
+  1: "Inner Race Fault"
+  2: "Outer Race Fault"
+  3: "Ball Fault"
+
+fault_sizes:  # inches
+  - 0.007
+  - 0.014
+  - 0.021
+
+features:
+  time_domain: true
+  frequency_domain: true
+  envelope: true
+  n_fft_bins: 512
+
+models:
+  xgboost:
+    n_estimators: 300
+    max_depth: 6
+    learning_rate: 0.1
+    subsample: 0.8
+    colsample_bytree: 0.8
+    random_state: 42
+
+  random_forest:
+    n_estimators: 200
+    max_depth: 15
+    min_samples_split: 5
+    random_state: 42
+
+  pinn:
+    hidden_layers: [128, 64, 32]
+    epochs: 100
+    learning_rate: 0.001
+    physics_weight: 0.1         # λ in L = L_data + λ·L_physics
+    batch_size: 64
+
+dashboard:
+  port: 8501
+  theme: "dark"
