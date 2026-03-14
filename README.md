@@ -17,7 +17,7 @@
 
 ---
 
-## 📌 Context & Motivation
+##  Context & Motivation
 
 Bearing failures account for **40–50% of all rotating machine breakdowns**, causing unplanned downtime and significant industrial losses. Early fault detection — before catastrophic failure — is the cornerstone of modern predictive maintenance strategies.
 
@@ -31,7 +31,7 @@ This project implements a **full ML pipeline** that:
 
 ---
 
-## 🏗️ Architecture
+##  Architecture
 
 ```
 bearing-fault-detection/
@@ -70,7 +70,7 @@ bearing-fault-detection/
 
 ---
 
-## 🎯 Fault Classes
+##  Fault Classes
 
 | Class | Label | Description | Severity |
 |-------|-------|-------------|----------|
@@ -81,7 +81,7 @@ bearing-fault-detection/
 
 ---
 
-## 📊 Feature Engineering
+##  Feature Engineering
 
 The pipeline extracts **52 features** across three domains:
 
@@ -102,7 +102,7 @@ The pipeline extracts **52 features** across three domains:
 
 ---
 
-## 🤖 Models
+##  Models
 
 ### 1. Classical ML Baseline
 ```
@@ -131,7 +131,7 @@ This ensures the model **respects physical laws** even in low-data regimes, maki
 
 ---
 
-## 📈 Results
+##  Results
 
 | Model | Accuracy | F1 (macro) | Training Time |
 |-------|----------|------------|---------------|
@@ -144,7 +144,7 @@ This ensures the model **respects physical laws** even in low-data regimes, maki
 
 ---
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Installation
 ```bash
@@ -170,7 +170,7 @@ streamlit run src/dashboard/app.py
 
 ---
 
-## 📦 Dataset
+##  Dataset
 
 This project uses the **[CWRU Bearing Dataset](https://engineering.case.edu/bearingdatacenter)** — the most widely used public benchmark for bearing fault diagnosis research.
 
@@ -196,7 +196,7 @@ Where `N` = number of balls, `d` = ball diameter, `D` = pitch diameter, `α` = c
 
 ---
 
-## 📚 References
+##  References
 
 - [1] Smith, W.A. & Randall, R.B. (2015). *Rolling element bearing diagnostics using the Case Western Reserve University data: A benchmark study*. Mechanical Systems and Signal Processing.
 - [2] Raissi, M. et al. (2019). *Physics-informed neural networks*. Journal of Computational Physics.
@@ -204,7 +204,7 @@ Where `N` = number of balls, `d` = ball diameter, `D` = pitch diameter, `α` = c
 
 ---
 
-## 👤 Author
+##  Author
 
 **Alaa Eddine TAHIR** — Engineering student at Arts et Métiers ParisTech  
 [LinkedIn](https://linkedin.com/in/alaaeddine-tahir) · [GitHub](https://github.com/yourusername)
