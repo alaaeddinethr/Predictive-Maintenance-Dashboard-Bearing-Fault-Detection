@@ -12,11 +12,13 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import os
 import sys
 from pathlib import Path
 
+import joblib
+import matplotlib
 import numpy as np
+import xgboost as xgb
 import yaml
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (
@@ -28,16 +30,14 @@ from sklearn.metrics import (
 from sklearn.model_selection import StratifiedKFold, cross_val_score, train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
-import xgboost as xgb
-import joblib
-import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from src.features.feature_extraction import FeatureExtractor, BearingGeometry
+from src.features.feature_extraction import BearingGeometry, FeatureExtractor
 from src.models.pinn import BearingPINN, PhysicsConstraint, PINNTrainer
 
 CLASS_NAMES = ["Normal", "Inner Race", "Outer Race", "Ball Fault"]
