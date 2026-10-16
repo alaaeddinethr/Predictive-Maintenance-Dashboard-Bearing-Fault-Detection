@@ -18,10 +18,9 @@ Usage:
 from __future__ import annotations
 
 import numpy as np
+from scipy.fft import rfft, rfftfreq
 from scipy.signal import hilbert
 from scipy.stats import kurtosis, skew
-from scipy.fft import rfft, rfftfreq
-
 
 # ─── Bearing Geometry (CWRU 6205-2RS JEM SKF) ────────────────────────────────
 

@@ -21,24 +21,24 @@ import sys
 from pathlib import Path
 
 import joblib
-import numpy as np
 import matplotlib
+import numpy as np
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
 import seaborn as sns
 from sklearn.metrics import (
     accuracy_score,
+    auc,
     classification_report,
     confusion_matrix,
     roc_curve,
-    auc,
 )
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, label_binarize
+from sklearn.preprocessing import label_binarize
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from src.features.feature_extraction import FeatureExtractor, BearingGeometry
+from src.features.feature_extraction import BearingGeometry, FeatureExtractor
 
 CLASS_NAMES  = ["Normal", "Inner Race", "Outer Race", "Ball Fault"]
 CLASS_COLORS = ["#3fb950", "#ff7b72", "#e3b341", "#d2a8ff"]
@@ -260,7 +260,7 @@ def plot_fault_freq_contribution(
                 means.append(class_mean)
                 labels.append(display_name.replace(" Energy", ""))
 
-        bars = ax.bar(labels, means, color=color, alpha=0.85, edgecolor="#30363d")
+        ax.bar(labels, means, color=color, alpha=0.85, edgecolor="#30363d")
         ax.set_title(cls_name, color=color, fontsize=10)
         ax.set_xlabel("Fault Freq.", fontsize=8)
         ax.set_ylabel("Mean Energy" if cls == 0 else "", fontsize=8)

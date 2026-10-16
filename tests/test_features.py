@@ -4,13 +4,14 @@ test_features.py
 Unit tests for the feature extraction pipeline.
 """
 
-import numpy as np
-import pytest
 import sys
 from pathlib import Path
 
+import numpy as np
+import pytest
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from src.features.feature_extraction import FeatureExtractor, BearingGeometry
+from src.features.feature_extraction import BearingGeometry, FeatureExtractor
 
 
 class TestBearingGeometry:

@@ -17,18 +17,16 @@ Run:
 import sys
 from pathlib import Path
 
+import joblib
 import numpy as np
-import streamlit as st
 import plotly.graph_objects as go
-import plotly.express as px
-from plotly.subplots import make_subplots
 import scipy.io
+import streamlit as st
 from scipy.fft import rfft, rfftfreq
 from scipy.signal import hilbert
-import joblib
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from src.features.feature_extraction import FeatureExtractor, BearingGeometry
+from src.features.feature_extraction import BearingGeometry, FeatureExtractor
 
 # ─── Page Config ─────────────────────────────────────────────────────────────
 
