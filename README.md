@@ -52,14 +52,8 @@ bearing-fault-detection/
 │   └── dashboard/
 │       └── app.py                 # Streamlit interactive dashboard
 │
-├── notebooks/
-│   ├── 01_EDA.ipynb               # Exploratory Data Analysis
-│   ├── 02_Feature_Engineering.ipynb
-│   └── 03_Model_Comparison.ipynb
-│
 ├── tests/
-│   ├── test_features.py
-│   └── test_models.py
+│   └── test_features.py
 │
 ├── .github/workflows/
 │   └── ci.yml                     # Automated testing & linting
