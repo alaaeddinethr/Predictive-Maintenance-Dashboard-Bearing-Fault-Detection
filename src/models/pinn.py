@@ -25,13 +25,13 @@ Reference:
 
 from __future__ import annotations
 
-import numpy as np
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from torch.utils.data import DataLoader, TensorDataset
 from pathlib import Path
 
+import numpy as np
+import torch
+import torch.nn.functional as F
+from torch import nn
+from torch.utils.data import DataLoader, TensorDataset
 
 # ─── Network Architecture ────────────────────────────────────────────────────
 
@@ -147,7 +147,6 @@ class PhysicsConstraint:
         if self.lambda_physics == 0:
             return torch.tensor(0.0, requires_grad=True)
 
-        batch_size = attention.shape[0]
         loss = torch.tensor(0.0, device=attention.device)
         n = 0
 
@@ -254,8 +253,7 @@ class PINNTrainer:
             self.history["val_loss"].append(val_loss)
             self.history["val_acc"].append(val_acc)
 
-            if val_acc > best_val_acc:
-                best_val_acc = val_acc
+            best_val_acc = max(best_val_acc, val_acc)
 
             if epoch % 10 == 0:
                 print(
