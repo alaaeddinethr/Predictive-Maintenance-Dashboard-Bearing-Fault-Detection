@@ -1,208 +1,96 @@
-# 🔩 Bearing Fault Detection — Predictive Maintenance System
+# Bearing Fault Detection from Vibration Signals
 
-<div align="center">
+Diagnosing rolling-bearing faults (inner race, outer race, ball) from raw accelerometer data, combining signal-processing features grounded in bearing physics with machine-learning classifiers and a physics-informed neural network.
 
-![Python](https://img.shields.io/badge/Python-3.10+-blue?style=flat-square&logo=python)
-![Streamlit](https://img.shields.io/badge/Streamlit-1.35-red?style=flat-square&logo=streamlit)
-![scikit-learn](https://img.shields.io/badge/scikit--learn-1.4-orange?style=flat-square&logo=scikit-learn)
-![PyTorch](https://img.shields.io/badge/PyTorch-2.x-ee4c2c?style=flat-square&logo=pytorch)
-![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
-![CI](https://img.shields.io/github/actions/workflow/status/yourusername/bearing-fault-detection/ci.yml?style=flat-square&label=CI)
+[![CI](https://github.com/alaaeddinethr/Predictive-Maintenance-Dashboard-Bearing-Fault-Detection/actions/workflows/ci.yml/badge.svg)](https://github.com/alaaeddinethr/Predictive-Maintenance-Dashboard-Bearing-Fault-Detection/actions/workflows/ci.yml)
+![Python](https://img.shields.io/badge/Python-3.10+-blue)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-**End-to-end predictive maintenance pipeline for rotating machinery, from raw vibration signals to real-time fault diagnosis.**
+> Extension of a project that placed 3rd at the MTI 2025 hackathon (physics-informed neural networks for bearing degradation).
 
-[Live Demo](#) · [Documentation](#architecture) · [Dataset](#dataset)
+## Why it matters
 
-</div>
+Bearings are one of the most common failure points in rotating machinery: motors, pumps, gearboxes, railway axles. A defect on a ring or a ball produces a small impact every time a ball rolls over it. Those impacts repeat at frequencies fixed by the bearing geometry, so a fault can be detected and located from vibration long before the machine breaks.
 
----
+## What the signals look like
 
-##  Context & Motivation
+![Raw vibration and envelope spectra](assets/envelope_spectra.png)
 
-Bearing failures account for **40–50% of all rotating machine breakdowns**, causing unplanned downtime and significant industrial losses. Early fault detection — before catastrophic failure — is the cornerstone of modern predictive maintenance strategies.
+The envelope spectrum (right) is where the physics shows. The inner-race fault peaks exactly at **BPFI = 162 Hz** and its harmonics, the outer-race fault at **BPFO = 107 Hz**, both predicted from the bearing geometry before looking at any data. Ball faults are the hardest case: their signature is weak and buried in noise, which matches what the bearing-diagnostics literature reports for this dataset.
 
-This project implements a **full ML pipeline** that:
-1. Processes raw vibration signals (accelerometer data)
-2. Extracts rich time-frequency features
-3. Classifies bearing faults with >97% accuracy
-4. Provides an interactive real-time diagnosis dashboard
+## Results
 
-> Built as an extension of a 3rd-place national hackathon project (MTI Hackathon 2025) on Physics-Informed Neural Networks for bearing degradation modeling.
+Data: CWRU bearing dataset, drive-end accelerometer at 12 kHz, 20 recordings, 4 classes (normal, inner race, outer race, ball), 2,048-sample windows. Each window is described by **52 features**: 18 time-domain (RMS, kurtosis, crest factor...), 20 frequency-domain (band powers, energy around BPFI/BPFO/BSF/FTF) and 14 envelope features.
 
----
+**Evaluation on an unseen operating condition.** The model is trained on three motor loads and tested on the fourth, which it has never seen (`src/models/evaluate_by_load.py`):
 
-##  Architecture
+| Model | 0 HP | 1 HP | 2 HP | 3 HP | Mean |
+|---|---|---|---|---|---|
+| XGBoost | 99.9 % | 100 % | 100 % | 99.5 % | **99.8 %** |
+| Random Forest | 100 % | 100 % | 100 % | 100 % | **100 %** |
 
-```
-bearing-fault-detection/
-│
-├── src/
-│   ├── data/
-│   │   ├── download_data.py       # CWRU dataset downloader & parser
-│   │   └── preprocessing.py       # Signal windowing & normalization
-│   │
-│   ├── features/
-│   │   └── feature_extraction.py  # Time + Frequency + Envelope features
-│   │
-│   ├── models/
-│   │   ├── train.py               # Classical ML (XGBoost, Random Forest)
-│   │   ├── pinn.py                # Physics-Informed Neural Network
-│   │   └── evaluate.py            # Metrics, confusion matrix, SHAP
-│   │
-│   └── dashboard/
-│       └── app.py                 # Streamlit interactive dashboard
-│
-├── tests/
-│   └── test_features.py
-│
-├── .github/workflows/
-│   └── ci.yml                     # Automated testing & linting
-│
-├── config.yaml                    # Centralized configuration
-└── requirements.txt
-```
+**A note on honest evaluation.** A random train/test split of overlapping windows also gives 100 %, but that number is meaningless: neighbouring windows from the same recording end up on both sides. Holding out a whole operating condition is the stricter test. Even so, CWRU is a clean laboratory benchmark and near-perfect scores on it are common (Smith & Randall, 2015). The real challenge is generalising to other machines, noisier sensors and fault sizes not seen in training; see next steps.
 
----
+## Physics-informed neural network
 
-##  Fault Classes
-
-| Class | Label | Description | Severity |
-|-------|-------|-------------|----------|
-| Normal | `NOR` | Healthy bearing | — |
-| Inner Race Fault | `IRF` | Defect on inner ring | 0.007" / 0.014" / 0.021" |
-| Outer Race Fault | `ORF` | Defect on outer ring | 0.007" / 0.014" / 0.021" |
-| Ball Fault | `BF` | Rolling element defect | 0.007" / 0.014" / 0.021" |
-
----
-
-##  Feature Engineering
-
-The pipeline extracts **52 features** across three domains:
-
-### Time Domain (18 features)
-- RMS, Peak, Crest Factor, Kurtosis, Skewness
-- Peak-to-Peak, Shape Factor, Impulse Factor, Clearance Factor
-- Statistical moments (mean, std, variance)
-
-### Frequency Domain (20 features)
-- FFT Power Spectrum (dominant frequencies)
-- Bearing Defect Frequencies: BPFI, BPFO, BSF, FTF
-- Spectral centroid, bandwidth, rolloff
-
-### Envelope Analysis (14 features)
-- Hilbert Transform → Envelope signal
-- Envelope spectrum peaks at fault characteristic frequencies
-- Modulation sideband energy
-
----
-
-##  Models
-
-### 1. Classical ML Baseline
-```
-XGBoost Classifier
-  └─ Accuracy: 97.8%
-  └─ F1-Score (macro): 0.977
-  └─ Inference: <1ms per sample
-
-Random Forest
-  └─ Accuracy: 96.4%
-  └─ Best for: interpretability via feature importance
-```
-
-### 2. Physics-Informed Neural Network (PINN)
-A custom PINN that incorporates bearing mechanics equations as physics constraints in the loss function:
+The PINN learns an attention weight for each of the 52 features. Its loss adds a physics term that forces the network, for each fault class, to attend more to the features computed at that fault's theoretical frequency than to the others (energy at BPFI for an inner-race fault, at BPFO for an outer-race fault, at BSF for a ball fault):
 
 ```
-L_total = L_data + λ · L_physics
-
-L_physics = ||ω_fault_predicted - ω_fault_theoretical||²
+L_total   = L_cross-entropy + λ · L_physics
+L_physics = mean( max(0, attention_other_faults − attention_own_fault + 0.1) )      λ = 0.1
 ```
 
-Where theoretical fault frequencies are derived from bearing geometry (BPFI, BPFO, BSF, FTF formulas).
+The network therefore cannot reach a correct answer for a physically wrong reason, and its attention weights can be read as an explanation. Fault frequencies come from the bearing geometry (SKF 6205, 9 balls, shaft at 1,797 rpm):
 
-This ensures the model **respects physical laws** even in low-data regimes, making it more robust than pure data-driven approaches.
+| Frequency | Formula | Value |
+|---|---|---|
+| BPFI (inner race) | `(N/2)(1 + d/D·cos α)·fr` | 162.2 Hz |
+| BPFO (outer race) | `(N/2)(1 − d/D·cos α)·fr` | 107.4 Hz |
+| BSF (ball spin) | `(D/2d)(1 − (d/D)²cos²α)·fr` | 70.6 Hz |
+| FTF (cage) | `(1/2)(1 − d/D·cos α)·fr` | 11.9 Hz |
 
----
+## Project structure
 
-##  Results
+```
+src/
+├── data/
+│   ├── download_data.py        # download CWRU files, build windowed dataset
+│   └── preprocessing.py        # band-pass filter, normalisation, windowing
+├── features/
+│   ├── feature_extraction.py   # 52 time, frequency and envelope features
+│   └── plot_signals.py         # envelope-spectrum figure above
+├── models/
+│   ├── train.py                # XGBoost, Random Forest, PINN
+│   ├── pinn.py                 # physics-informed network and loss
+│   ├── evaluate.py             # metrics and plots
+│   └── evaluate_by_load.py     # leave-one-load-out evaluation
+└── dashboard/app.py            # Streamlit diagnosis dashboard
+tests/test_features.py          # 17 unit tests
+```
 
-| Model | Accuracy | F1 (macro) | Training Time |
-|-------|----------|------------|---------------|
-| Random Forest | 96.4% | 0.961 | 12s |
-| XGBoost | **97.8%** | **0.977** | 18s |
-| PINN | 95.2% | 0.949 | 45s |
-| SVM (baseline) | 89.1% | 0.887 | 8s |
+## Run it
 
-*Evaluated on CWRU dataset, 12kHz drive-end accelerometer, 80/20 train-test split*
-
----
-
-##  Quick Start
-
-### Installation
 ```bash
-git clone https://github.com/yourusername/bearing-fault-detection.git
-cd bearing-fault-detection
 pip install -r requirements.txt
+python src/data/download_data.py --process      # ~80 MB from Case Western Reserve University
+python src/models/evaluate_by_load.py           # results table above
+python src/models/train.py --model all          # train XGBoost, Random Forest and PINN
+streamlit run src/dashboard/app.py              # interactive dashboard
+pytest tests
 ```
 
-### Download Dataset
-```bash
-python src/data/download_data.py
-```
+## Next steps
 
-### Train Models
-```bash
-python src/models/train.py --model xgboost --save
-```
+- **Cross-fault-size test**: train on 0.007" defects, test on 0.014" and 0.021", closer to real wear progression.
+- **Cross-dataset test**: train on CWRU, test on the Paderborn or IMS datasets with different machines.
+- **Degradation, not just classification**: estimate remaining useful life from run-to-failure data, as in my [turbofan RUL project](https://github.com/alaaeddinethr/turbofan-rul-prognostics).
 
-### Launch Dashboard
-```bash
-streamlit run src/dashboard/app.py
-```
+## References
+
+- Smith, W. A., Randall, R. B. (2015). Rolling element bearing diagnostics using the Case Western Reserve University data: a benchmark study. *Mechanical Systems and Signal Processing*, 64–65.
+- Raissi, M., Perdikaris, P., Karniadakis, G. E. (2019). Physics-informed neural networks. *Journal of Computational Physics*, 378.
+- Case Western Reserve University Bearing Data Center: https://engineering.case.edu/bearingdatacenter
 
 ---
 
-##  Dataset
-
-This project uses the **[CWRU Bearing Dataset](https://engineering.case.edu/bearingdatacenter)** — the most widely used public benchmark for bearing fault diagnosis research.
-
-- **Institution**: Case Western Reserve University (Ohio, USA)
-- **Signal**: Accelerometer data at 12kHz and 48kHz
-- **Loads**: 0, 1, 2, 3 HP motor loads
-- **Setup**: Drive-end and fan-end bearing measurements
-
----
-
-## 🔬 Scientific Background
-
-Bearing fault frequencies are derived from geometry:
-
-| Fault | Formula | Description |
-|-------|---------|-------------|
-| BPFI | `(N/2) · (1 + d/D · cos α) · fr` | Ball Pass Freq. Inner race |
-| BPFO | `(N/2) · (1 - d/D · cos α) · fr` | Ball Pass Freq. Outer race |
-| BSF | `(D/2d) · (1 - (d/D)² · cos²α) · fr` | Ball Spin Frequency |
-| FTF | `(1/2) · (1 - d/D · cos α) · fr` | Fundamental Train Freq. |
-
-Where `N` = number of balls, `d` = ball diameter, `D` = pitch diameter, `α` = contact angle, `fr` = shaft rotation frequency.
-
----
-
-##  References
-
-- [1] Smith, W.A. & Randall, R.B. (2015). *Rolling element bearing diagnostics using the Case Western Reserve University data: A benchmark study*. Mechanical Systems and Signal Processing.
-- [2] Raissi, M. et al. (2019). *Physics-informed neural networks*. Journal of Computational Physics.
-- [3] Lei, Y. et al. (2020). *Applications of machine learning to machine fault diagnosis*. Mechanical Systems and Signal Processing.
-
----
-
-##  Author
-
-**Alaa Eddine TAHIR** — Engineering student at Arts et Métiers ParisTech  
-[LinkedIn](https://linkedin.com/in/alaaeddine-tahir) · [GitHub](https://github.com/yourusername)
-
----
-
-*This project extends work done at the MTI Hackathon 2025 (3rd place nationally) on PINN-based bearing degradation modeling.*
+Alaa Eddine Tahir, engineering student at Arts et Métiers · [LinkedIn](https://linkedin.com/in/alaaeddine-tahir)
