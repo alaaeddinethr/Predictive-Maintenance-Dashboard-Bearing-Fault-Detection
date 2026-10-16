@@ -1,0 +1,46 @@
+{
+  "XGBoost": {
+    "per_held_out_load": {
+      "0 HP": {
+        "accuracy": 0.9986,
+        "f1_macro": 0.9984
+      },
+      "1 HP": {
+        "accuracy": 1.0,
+        "f1_macro": 1.0
+      },
+      "2 HP": {
+        "accuracy": 1.0,
+        "f1_macro": 1.0
+      },
+      "3 HP": {
+        "accuracy": 0.9947,
+        "f1_macro": 0.9925
+      }
+    },
+    "mean_accuracy": 0.9983,
+    "min_accuracy": 0.9947
+  },
+  "Random Forest": {
+    "per_held_out_load": {
+      "0 HP": {
+        "accuracy": 1.0,
+        "f1_macro": 1.0
+      },
+      "1 HP": {
+        "accuracy": 1.0,
+        "f1_macro": 1.0
+      },
+      "2 HP": {
+        "accuracy": 1.0,
+        "f1_macro": 1.0
+      },
+      "3 HP": {
+        "accuracy": 1.0,
+        "f1_macro": 1.0
+      }
+    },
+    "mean_accuracy": 1.0,
+    "min_accuracy": 1.0
+  }
+}
